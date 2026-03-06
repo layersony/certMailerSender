@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CertMail</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0d0d0d;
+    --cream: #faf8f3;
+    --warm: #f0ebe0;
+    --accent: #c8502a;
+    --accent2: #2a6ec8;
+    --success: #1e8a4a;
+    --warn: #b88a00;
+    --border: #d8d2c4;
+    --card: #ffffff;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07), 0 0 0 1px var(--border);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  header {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 0 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.3rem;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .steps-nav { display: flex; gap: 0.25rem; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+  .step-tab { padding: 0.35rem 1rem; border-radius: 100px; color: rgba(255,255,255,0.45); transition: all 0.2s; cursor: default; }
+  .step-tab.active { background: var(--accent); color: white; }
+  .step-tab.done { color: rgba(255,255,255,0.7); }
+
+  main { max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+
+  .panel { display: none; animation: fadeUp 0.3s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+  .section-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 2rem; line-height: 1.1; margin-bottom: 0.4rem; letter-spacing: -0.03em; }
+  .section-sub { color: #666; font-size: 0.93rem; margin-bottom: 2rem; }
+
+  .card { background: var(--card); border-radius: 16px; box-shadow: var(--shadow); padding: 2rem; margin-bottom: 1.5rem; }
+  .card-title { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.06em; color: #888; margin-bottom: 1.25rem; }
+
+  .upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem; }
+  @media (max-width: 620px) { .upload-grid { grid-template-columns: 1fr; } }
+
+  .drop-zone {
+    border: 2px dashed var(--border); border-radius: 12px; padding: 2.5rem 1.5rem;
+    text-align: center; cursor: pointer; transition: all 0.2s; position: relative;
+  }
+  .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: rgba(200,80,42,0.04); }
+  .drop-zone.has-file { border-color: var(--success); background: rgba(30,138,74,0.04); }
+  .drop-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .drop-label { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.9rem; margin-bottom: 0.25rem; }
+  .drop-hint { font-size: 0.78rem; color: #999; }
+  .drop-filename { font-size: 0.8rem; color: var(--success); font-weight: 500; margin-top: 0.5rem; }
+
+  .field { margin-bottom: 1.25rem; }
+  .field label { display: block; font-size: 0.82rem; font-weight: 500; color: #555; margin-bottom: 0.4rem; letter-spacing: 0.02em; }
+  .field input, .field textarea {
+    width: 100%; border: 1.5px solid var(--border); border-radius: 8px;
+    padding: 0.65rem 0.9rem; font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+    background: var(--cream); color: var(--ink); transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+  }
+  .field input:focus, .field textarea:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(42,110,200,0.1); }
+  .field textarea { min-height: 110px; resize: vertical; line-height: 1.5; }
+  .field-note { font-size: 0.75rem; color: #999; margin-top: 0.3rem; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.7rem 1.6rem; border-radius: 8px;
+    font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.9rem;
+    letter-spacing: 0.01em; cursor: pointer; transition: all 0.15s; border: none;
+  }
+  .btn-primary { background: var(--ink); color: white; }
+  .btn-primary:hover { background: #222; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+  .btn-accent { background: var(--accent); color: white; }
+  .btn-accent:hover { background: #b04020; transform: translateY(-1px); }
+  .btn-success { background: var(--success); color: white; }
+  .btn-success:hover { background: #167a40; }
+  .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--ink); }
+  .btn-outline:hover { border-color: var(--ink); background: var(--warm); }
+  .btn-sm { padding: 0.4rem 0.9rem; font-size: 0.8rem; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+
+  .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+  thead th {
+    background: var(--warm); padding: 0.75rem 1rem; text-align: left;
+    font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase; color: #666;
+    border-bottom: 1px solid var(--border); white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(0,0,0,0.02); }
+  td { padding: 0.75rem 1rem; vertical-align: middle; }
+  td.name-cell { font-weight: 500; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    padding: 0.2rem 0.6rem; border-radius: 100px;
+    font-size: 0.73rem; font-weight: 600; letter-spacing: 0.02em;
+  }
+  .badge-ok { background: rgba(30,138,74,0.12); color: var(--success); }
+  .badge-warn { background: rgba(184,138,0,0.12); color: var(--warn); }
+  .badge-sent { background: rgba(42,110,200,0.12); color: var(--accent2); }
+
+  .actions-bar {
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+    padding: 1.25rem 1.5rem; background: var(--ink); border-radius: 12px;
+    margin-bottom: 1.5rem; color: white;
+  }
+  .actions-bar .summary { flex: 1; font-size: 0.88rem; color: rgba(255,255,255,0.7); }
+  .actions-bar .summary strong { color: white; }
+
+  .progress-wrap { margin-top: 1.25rem; }
+  .progress-bar-bg { background: var(--border); border-radius: 100px; height: 8px; overflow: hidden; margin: 0.5rem 0; }
+  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--success)); border-radius: 100px; transition: width 0.3s; width: 0%; }
+  .progress-label { font-size: 0.83rem; color: #666; }
+
+  .alert { padding: 0.85rem 1.1rem; border-radius: 8px; font-size: 0.87rem; margin-bottom: 1rem; display: none; }
+  .alert.show { display: flex; align-items: flex-start; gap: 0.6rem; }
+  .alert-error { background: rgba(200,80,42,0.1); color: #b03010; border: 1px solid rgba(200,80,42,0.2); }
+
+  td.check-col, th.check-col { width: 40px; text-align: center; }
+  input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--accent2); cursor: pointer; }
+
+  .spinner { width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty-state { text-align: center; padding: 3rem 1rem; color: #aaa; }
+  .empty-state .empty-icon { font-size: 3rem; margin-bottom: 0.75rem; }
+
+  #toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--ink); color: white; padding: 0.85rem 1.4rem; border-radius: 10px; font-size: 0.88rem; font-weight: 500; transform: translateY(80px); opacity: 0; transition: all 0.3s; z-index: 999; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+  #toast.show { transform: translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">CertMail</div>
+  <nav class="steps-nav">
+    <div class="step-tab active" id="tab-1">1 · Upload</div>
+    <div class="step-tab" id="tab-2">2 · Preview</div>
+    <div class="step-tab" id="tab-3">3 · Send</div>
+  </nav>
+</header>
+
+<main>
+
+  <!-- PANEL 1: UPLOAD -->
+  <div class="panel active" id="panel-1">
+    <h1 class="section-title">Upload Files</h1>
+    <p class="section-sub">Upload your student list (CSV) and certificates (ZIP of PDFs).</p>
+
+    <div id="upload-alert" class="alert alert-error"></div>
+
+    <div class="card">
+      <div class="card-title">Step 1 — Source Files</div>
+      <div class="upload-grid">
+        <div class="drop-zone" id="csv-drop">
+          <input type="file" id="csv-input" accept=".csv">
+          <div class="drop-label">Student List (CSV)</div>
+          <div class="drop-hint">name, email columns required</div>
+          <div class="drop-filename" id="csv-name"></div>
+        </div>
+        <div class="drop-zone" id="zip-drop">
+          <input type="file" id="zip-input" accept=".zip">
+          <div class="drop-label">Certificates (ZIP)</div>
+          <div class="drop-hint">ZIP of PDFs named like bernice-munini-limo_certificate.pdf</div>
+          <div class="drop-filename" id="zip-name"></div>
+        </div>
+      </div>
+      <p style="font-size:0.78rem;color:#999;margin-bottom:1.5rem;">
+        PDF filename format: <code>firstname-middlename-lastname_certificate.pdf</code> or <code>firstname-middlename-lastname.pdf</code>
+      </p>
+      <button class="btn btn-primary" id="upload-btn" onclick="doUpload()">
+        <span id="upload-spinner" class="spinner"></span>
+        Process Files →
+      </button>
+    </div>
+  </div>
+
+  <!-- PANEL 2: PREVIEW -->
+  <div class="panel" id="panel-2">
+    <h1 class="section-title">Preview &amp; Merge</h1>
+    <p class="section-sub">Review the matched students and certificates before sending.</p>
+
+    <div class="actions-bar">
+      <div class="summary" id="merge-summary">Loading...</div>
+      <button class="btn btn-outline btn-sm" style="color:white;border-color:rgba(255,255,255,0.3)" onclick="goToStep(1)">← Back</button>
+      <button class="btn btn-accent" onclick="goToStep(3)">Configure &amp; Send →</button>
+    </div>
+
+    <div class="card" style="padding:0">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="check-col"><input type="checkbox" id="select-all" onchange="toggleAll(this)"></th>
+              <th>Student Name</th>
+              <th>Email Address</th>
+              <th>Certificate File</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="student-table-body">
+            <tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📭</div><p>Upload files to see students here.</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 3: SEND -->
+  <div class="panel" id="panel-3">
+    <h1 class="section-title">Configure &amp; Send</h1>
+    <p class="section-sub">Compose your email and send certificates to students.</p>
+
+    <div class="card">
+      <div class="card-title">Email Content</div>
+      <div class="field">
+        <label>Subject</label>
+        <input type="text" id="email-subject" value="Your Certificate — {name}">
+        <div class="field-note">Use <code>{name}</code> as a placeholder for student name.</div>
+      </div>
+      <div class="field">
+        <label>Body</label>
+        <textarea id="email-body">Dear {name},
+
+Congratulations! Please find your certificate attached to this email.
+
+We are proud of your achievement and wish you continued success.
+
+Best regards,
+The Team</textarea>
+        <div class="field-note">Use <code>{name}</code> and <code>{email}</code> for mail merge placeholders.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Send</div>
+      <div id="send-summary" style="font-size:0.9rem;color:#555;margin-bottom:1.25rem;"></div>
+
+      <div id="send-alert" class="alert alert-error"></div>
+
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin-bottom:1.5rem;">
+        <button class="btn btn-success" id="send-all-btn" onclick="sendEmails()">
+          <span id="send-spinner" class="spinner"></span>
+          ✉️ Send to All Selected
+        </button>
+        <button class="btn btn-outline" onclick="goToStep(2)">← Back to Preview</button>
+      </div>
+
+      <div class="progress-wrap" id="progress-wrap" style="display:none">
+        <div class="progress-label" id="progress-label">Sending 0 of 0...</div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar"></div></div>
+        <div id="error-list" style="margin-top:0.75rem;font-size:0.82rem;color:var(--accent);"></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div id="toast"></div>
+
+<script>
+  let students = [];
+
+  // Drag & Drop
+  function setupDrop(zoneId, inputId, nameId) {
+    const zone = document.getElementById(zoneId);
+    const input = document.getElementById(inputId);
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault(); zone.classList.remove('dragover');
+      if (e.dataTransfer.files[0]) { input.files = e.dataTransfer.files; showFileName(nameId, zoneId, e.dataTransfer.files[0].name); }
+    });
+    input.addEventListener('change', () => { if (input.files[0]) showFileName(nameId, zoneId, input.files[0].name); });
+  }
+  function showFileName(nameId, zoneId, name) {
+    document.getElementById(nameId).textContent = '✓ ' + name;
+    document.getElementById(zoneId).classList.add('has-file');
+  }
+  setupDrop('csv-drop', 'csv-input', 'csv-name');
+  setupDrop('zip-drop', 'zip-input', 'zip-name');
+
+  // Navigation
+  function goToStep(n) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.step-tab').forEach((t, i) => {
+      t.classList.toggle('active', i + 1 === n);
+      t.classList.toggle('done', i + 1 < n);
+    });
+    document.getElementById(`panel-${n}`).classList.add('active');
+    if (n === 3) updateSendSummary();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Upload
+  async function doUpload() {
+    const csvFile = document.getElementById('csv-input').files[0];
+    const zipFile = document.getElementById('zip-input').files[0];
+    const btn = document.getElementById('upload-btn');
+    const spinner = document.getElementById('upload-spinner');
+
+    document.getElementById('upload-alert').classList.remove('show');
+    if (!csvFile || !zipFile) { showAlert('upload-alert', 'Please select both a CSV file and a ZIP file.'); return; }
+
+    btn.disabled = true;
+    spinner.style.display = 'inline-block';
+
+    const fd = new FormData();
+    fd.append('csv_file', csvFile);
+    fd.append('zip_file', zipFile);
+
+    try {
+      const res = await fetch('/upload', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) { showAlert('upload-alert', data.error || 'Upload failed.'); return; }
+      students = data.students;
+      renderTable();
+      updateMergeSummary(data.pdf_count);
+      goToStep(2);
+    } catch (e) {
+      showAlert('upload-alert', 'Network error: ' + e.message);
+    } finally {
+      btn.disabled = false;
+      spinner.style.display = 'none';
+    }
+  }
+
+  // Table 
+  function renderTable() {
+    const tbody = document.getElementById('student-table-body');
+    if (!students.length) {
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📭</div><p>No students found.</p></div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = students.map((s, i) => {
+      const badge = s.certificate
+        ? `<span class="badge badge-ok">✓ Matched</span>`
+        : `<span class="badge badge-warn">⚠ No certificate</span>`;
+      const certName = s.certificate
+        ? `<span style="font-size:0.8rem;color:#555">${escHtml(s.certificate)}</span>`
+        : `<span style="font-size:0.8rem;color:#ccc;font-style:italic">—</span>`;
+      return `<tr>
+        <td class="check-col"><input type="checkbox" class="row-check" data-idx="${i}" ${s.certificate ? 'checked' : ''}></td>
+        <td class="name-cell">${escHtml(s.name)}</td>
+        <td><a href="mailto:${escHtml(s.email)}" style="color:var(--accent2);text-decoration:none">${escHtml(s.email)}</a></td>
+        <td>${certName}</td>
+        <td>${badge}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function toggleAll(cb) {
+    document.querySelectorAll('.row-check').forEach(c => { c.checked = cb.checked; });
+  }
+
+  function getSelected() {
+    return Array.from(document.querySelectorAll('.row-check:checked'))
+      .map(c => students[parseInt(c.dataset.idx)]);
+  }
+
+  function updateMergeSummary(pdfCount) {
+    const matched = students.filter(s => s.certificate).length;
+    const unmatched = students.length - matched;
+    document.getElementById('merge-summary').innerHTML =
+      `<strong>${students.length}</strong> students · <strong>${pdfCount}</strong> PDFs · ` +
+      `<strong style="color:#90EE90">${matched}</strong> matched` +
+      (unmatched ? ` · <strong style="color:#ffb366">${unmatched}</strong> unmatched` : '');
+  }
+
+  function updateSendSummary() {
+    const sel = getSelected();
+    const withCert = sel.filter(s => s.certificate).length;
+    document.getElementById('send-summary').innerHTML =
+      `<strong>${sel.length}</strong> students selected · <strong>${withCert}</strong> with certificate attached · <strong>${sel.length - withCert}</strong> without attachment`;
+  }
+
+  // Send
+  async function sendEmails() {
+    const selected = getSelected();
+    if (!selected.length) { showAlert('send-alert', 'No students selected. Go back and check the boxes.'); return; }
+
+    document.getElementById('send-alert').classList.remove('show');
+    const btn = document.getElementById('send-all-btn');
+    const spinner = document.getElementById('send-spinner');
+    btn.disabled = true;
+    spinner.style.display = 'inline-block';
+
+    const payload = {
+      students: selected,
+      subject: document.getElementById('email-subject').value,
+      body: document.getElementById('email-body').value
+    };
+
+    try {
+      const res = await fetch('/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) { showAlert('send-alert', data.error || 'Send failed.'); return; }
+
+      document.getElementById('progress-wrap').style.display = 'block';
+      pollProgress(data.task_id, selected.length);
+    } catch (e) {
+      showAlert('send-alert', 'Network error: ' + e.message);
+    } finally {
+      btn.disabled = false;
+      spinner.style.display = 'none';
+    }
+  }
+
+  function pollProgress(taskId, total) {
+    const bar = document.getElementById('progress-bar');
+    const label = document.getElementById('progress-label');
+    const errList = document.getElementById('error-list');
+
+    const iv = setInterval(async () => {
+      try {
+        const res = await fetch(`/status/${taskId}`);
+        const data = await res.json();
+        const pct = total > 0 ? Math.round((data.done / total) * 100) : 0;
+        bar.style.width = pct + '%';
+        label.textContent = `Sending ${data.done} of ${total}… (${pct}%)`;
+
+        if (data.errors && data.errors.length) {
+          errList.innerHTML = data.errors.map(e =>
+            `⚠ <strong>${escHtml(e.email)}</strong>: ${escHtml(e.error)}`
+          ).join('<br>');
+        }
+
+        if (data.complete) {
+          clearInterval(iv);
+          const errCount = (data.errors || []).filter(e => e.email !== 'SMTP Connection').length;
+          const ok = data.done - errCount;
+          label.textContent = `Done! ${ok} sent successfully${errCount ? `, ${errCount} failed` : ''}.`;
+          bar.style.width = '100%';
+          showToast(`✓ ${ok} email${ok !== 1 ? 's' : ''} sent!`);
+          markSent();
+        }
+      } catch (e) { clearInterval(iv); }
+    }, 800);
+  }
+
+  function markSent() {
+    document.querySelectorAll('.row-check:checked').forEach(c => {
+      const statusCell = c.closest('tr').querySelector('td:last-child');
+      if (statusCell) statusCell.innerHTML = `<span class="badge badge-sent">✉ Sent</span>`;
+    });
+  }
+
+  function showAlert(id, msg) {
+    const el = document.getElementById(id);
+    el.innerHTML = `<span>⚠</span><span>${escHtml(msg)}</span>`;
+    el.classList.add('show');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 4000);
+  }
+
+  function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+</body>
+</html>
