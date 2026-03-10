@@ -45,15 +45,25 @@ def slugify_name(name):
     return re.sub(r'\s+', '-', name.strip().lower())
 
 
-def match_certificate(student_name, pdf_files):
-    slug = slugify_name(student_name)
-    for pdf in pdf_files:
-        base = os.path.splitext(os.path.basename(pdf))[0].lower()
-        if base == slug or base == f"{slug}_certificate":
-            return pdf
-    for pdf in pdf_files:
-        if slug in pdf.lower():
-            return pdf
+def match_certificate(student_name, pdf_files, fname=None, lname=None):
+    # Build list of slugs to try: full name first, then fname+lname combo
+    slugs = [slugify_name(student_name)]
+    if fname and lname:
+        slugs.append(slugify_name(f"{fname} {lname}"))
+
+    # Exact match against all slugs
+    for slug in slugs:
+        for pdf in pdf_files:
+            base = os.path.splitext(os.path.basename(pdf))[0].lower()
+            if base == slug or base == f"{slug}_certificate":
+                return pdf
+
+    # Fuzzy: slug contained anywhere in filename
+    for slug in slugs:
+        for pdf in pdf_files:
+            if slug in pdf.lower():
+                return pdf
+
     return None
 
 @app.route('/robots.txt')
@@ -109,17 +119,23 @@ def upload():
     except Exception as e:
         return jsonify({'error': f'Failed to parse CSV: {str(e)}'}), 400
 
-    name_col = next((c for c in df.columns if 'name' in c), None)
+    fname_col = next((c for c in df.columns if 'first name' in c or 'first_name' in c or c in ('fname', 'firstname', 'first')), None)
+    lname_col = next((c for c in df.columns if 'last name'  in c or 'last_name'  in c or c in ('lname', 'lastname',  'last', 'surname')), None)
+    name_col  = next((c for c in df.columns if 'full name'  in c or 'full_name'  in c or c in ('name', 'fullname')), None)
     email_col = next((c for c in df.columns if 'email' in c or 'mail' in c), None)
 
-    if not name_col or not email_col:
-        return jsonify({'error': 'CSV must have columns containing "name" and "email".'}), 400
+    if not email_col:
+        return jsonify({'error': 'CSV must have a column containing "email".'}), 400
+    if not name_col and not (fname_col and lname_col):
+        return jsonify({'error': 'CSV must have either a "name" column or both "fname"/"lname" columns.'}), 400
 
     students = []
     for _, row in df.iterrows():
+        fname = str(row[fname_col]).strip()
+        lname = str(row[lname_col]).strip()
         name = str(row[name_col]).strip()
         email = str(row[email_col]).strip()
-        cert = match_certificate(name, pdf_files)
+        cert = match_certificate(name, pdf_files, fname=fname, lname=lname)
         students.append({
             'name': name,
             'email': email,
