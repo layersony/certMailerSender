@@ -156,6 +156,40 @@
   .empty-state { text-align: center; padding: 3rem 1rem; color: #aaa; }
   .empty-state .empty-icon { font-size: 3rem; margin-bottom: 0.75rem; }
 
+   /* STORAGE BAR */
+  #storage-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--ink);
+    color: rgba(255,255,255,0.7);
+    font-size: 0.78rem;
+    padding: 0.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    z-index: 200;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  #storage-bar .storage-label { flex: 1; }
+  #storage-bar .storage-label strong { color: white; }
+  #storage-bar .storage-size { font-family: monospace; color: #ffb366; font-size: 0.8rem; }
+  #storage-bar .btn-delete {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.3rem 0.9rem;
+    border-radius: 6px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid rgba(200,80,42,0.5);
+    background: transparent;
+    color: #ff8060;
+    transition: all 0.15s;
+  }
+  #storage-bar .btn-delete:hover { background: rgba(200,80,42,0.2); border-color: var(--accent); color: white; }
+  #storage-bar .btn-delete:disabled { opacity: 0.4; cursor: not-allowed; }
+  body { padding-bottom: 40px; }
+
   #toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--ink); color: white; padding: 0.85rem 1.4rem; border-radius: 10px; font-size: 0.88rem; font-weight: 500; transform: translateY(80px); opacity: 0; transition: all 0.3s; z-index: 999; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
   #toast.show { transform: translateY(0); opacity: 1; }
 </style>
@@ -289,6 +323,12 @@ The Team</textarea>
 </main>
 
 <div id="toast"></div>
+
+<div id="storage-bar" style="display: none;">
+  <span class="storage-label">Server uploads: <strong id="storage-files">—</strong> files · <span class="storage-size" id="storage-size">—</span></span>
+  <button class="btn-delete" id="refresh-storage-btn" onclick="refreshStorageInfo()" style="border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.6)" title="Refresh storage info">↻</button>
+  <button class="btn-delete" id="delete-btn" onclick="confirmCleanup()">🗑</button>
+</div>
 
 <script>
   let students = [];
@@ -520,6 +560,49 @@ The Team</textarea>
   function escHtml(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
+
+  // ── Storage bar ──────────────────────────────────────────────────────────────
+  function formatBytes(bytes) {
+    if (bytes === 0) return '0 B';
+    const units = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return (bytes / Math.pow(1024, i)).toFixed(i === 0 ? 0 : 1) + ' ' + units[i];
+  }
+
+  async function refreshStorageInfo() {
+    try {
+      const res = await fetch('/storage-info');
+      const d = await res.json();
+      document.getElementById('storage-files').textContent = d.files;
+      document.getElementById('storage-size').textContent = formatBytes(d.bytes);
+      document.getElementById('delete-btn').disabled = d.files === 0;
+    } catch (e) {}
+  }
+
+  async function confirmCleanup() {
+    const size = document.getElementById('storage-size').textContent;
+    const files = document.getElementById('storage-files').textContent;
+    if (!confirm(`Delete all uploaded files from the server?\n\n${files} files · ${size}\n\nThis cannot be undone.`)) return;
+
+    const btn = document.getElementById('delete-btn');
+    btn.disabled = true;
+    btn.textContent = 'Deleting…';
+
+    try {
+      const res = await fetch('/cleanup', { method: 'DELETE' });
+      const d = await res.json();
+      showToast(`🗑 Deleted ${d.deleted} item${d.deleted !== 1 ? 's' : ''} from server`);
+      // Reset app state
+      students = [];
+      renderTable();
+      await refreshStorageInfo();
+    } catch (e) {
+      showToast('Failed to delete: ' + e.message);
+    } finally {
+      btn.textContent = 'Delete All Uploads';
+    }
+  }
+
 </script>
 </body>
 </html>

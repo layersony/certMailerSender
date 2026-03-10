@@ -256,6 +256,36 @@ def get_status(task_id):
         return jsonify({'error': 'Unknown task'}), 404
     return jsonify(status)
 
+@app.route('/storage-info')
+def storage_info():
+    total_bytes = 0
+    total_files = 0
+    for root, dirs, files in os.walk(UPLOAD_FOLDER):
+        for f in files:
+            try:
+                total_bytes += os.path.getsize(os.path.join(root, f))
+                total_files += 1
+            except OSError:
+                pass
+    return jsonify({'bytes': total_bytes, 'files': total_files})
+
+
+@app.route('/cleanup', methods=['DELETE'])
+def cleanup():
+    import shutil
+    deleted = 0
+    errors = []
+    for item in os.listdir(UPLOAD_FOLDER):
+        item_path = os.path.join(UPLOAD_FOLDER, item)
+        try:
+            if os.path.isdir(item_path):
+                shutil.rmtree(item_path)
+            else:
+                os.remove(item_path)
+            deleted += 1
+        except Exception as e:
+            errors.append(str(e))
+    return jsonify({'deleted': deleted, 'errors': errors})
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
