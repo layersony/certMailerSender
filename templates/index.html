@@ -186,13 +186,13 @@
         <div class="drop-zone" id="csv-drop">
           <input type="file" id="csv-input" accept=".csv">
           <div class="drop-label">Student List (CSV)</div>
-          <div class="drop-hint">name, email columns required</div>
+          <div class="drop-hint">firstname, lastname, fullname, email columns required</div>
           <div class="drop-filename" id="csv-name"></div>
         </div>
         <div class="drop-zone" id="zip-drop">
           <input type="file" id="zip-input" accept=".zip">
           <div class="drop-label">Certificates (ZIP)</div>
-          <div class="drop-hint">ZIP of PDFs named like bernice-munini-limo_certificate.pdf</div>
+          <div class="drop-hint">ZIP of PDFs named like Firstname-lastname_certificate.pdf</div>
           <div class="drop-filename" id="zip-name"></div>
         </div>
       </div>
@@ -214,6 +214,7 @@
     <div class="actions-bar">
       <div class="summary" id="merge-summary">Loading...</div>
       <button class="btn btn-outline btn-sm" style="color:white;border-color:rgba(255,255,255,0.3)" onclick="goToStep(1)">← Back</button>
+      <button class="btn btn-outline btn-sm" id="download-missing-btn" style="color:#ffb366;border-color:rgba(255,179,102,0.4);display:none" onclick="downloadMissing()" title="Download list of students without a matched certificate">⬇ Missing Certificates</button>
       <button class="btn btn-accent" onclick="goToStep(3)">Configure &amp; Send →</button>
     </div>
 
@@ -396,6 +397,29 @@ The Team</textarea>
       `<strong>${students.length}</strong> students · <strong>${pdfCount}</strong> PDFs · ` +
       `<strong style="color:#90EE90">${matched}</strong> matched` +
       (unmatched ? ` · <strong style="color:#ffb366">${unmatched}</strong> unmatched` : '');
+    // Show download button only if there are unmatched students
+    document.getElementById('download-missing-btn').style.display = unmatched > 0 ? 'inline-flex' : 'none';
+  }
+
+  function downloadMissing() {
+    const missing = students.filter(s => !s.certificate);
+    if (!missing.length) return;
+
+    const rows = ['Name,Email'];
+    missing.forEach(s => {
+      const name  = `"${s.name.replace(/"/g, '""')}"`;
+      const email = `"${s.email.replace(/"/g, '""')}"`;
+      rows.push(`${name},${email}`);
+    });
+
+    const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'missing-certificates.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(`⬇ Downloaded ${missing.length} student${missing.length !== 1 ? 's' : ''} without certificates`);
   }
 
   function updateSendSummary() {

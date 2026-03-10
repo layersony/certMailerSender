@@ -10,6 +10,7 @@ from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 import pandas as pd
 import re
+import unicodedata
 
 load_dotenv()  # Load .env from project root
 
@@ -42,7 +43,37 @@ def mask_email(email):
 
 
 def slugify_name(name):
-    return re.sub(r'\s+', '-', name.strip().lower())
+    """
+    Convert a name to a URL/filename-safe slug.
+    Handles accented characters, French/Spanish diacritics, apostrophes,
+    smart quotes, hyphens, and any other non-ASCII naming characters.
+
+    Examples:
+      'François'        -> 'francois'
+      "O'Brien"         -> 'obrien'
+      'Jean-Pierre'     -> 'jean-pierre'
+      'Marie-Hélène'    -> 'marie-helene'
+      'D\u2019Souza'    -> 'dsouza'
+      'Müller'          -> 'muller'
+    """
+    # Decompose accented characters: é -> e + combining accent
+    name = unicodedata.normalize('NFD', name)
+
+    # Strip all combining/diacritic marks (accents, cedillas, tildes, etc.)
+    name = ''.join(c for c in name if unicodedata.category(c) != 'Mn')
+
+    # Collapse all apostrophe/quote variants to nothing
+    name = re.sub(r"['''\u2018\u2019\u201a\u201b`\u0060]", '', name)
+
+    # Convert hyphens and dashes to a space (preserves hyphenated names as two parts)
+    name = re.sub(r'[-\u2010-\u2015\u2212\uFE63\uFF0D]', ' ', name)
+    
+    # Lowercase and strip any remaining non-alphanumeric, non-space characters
+    name = re.sub(r'[^a-z0-9\s]', '', name.lower())
+    
+    # Collapse whitespace and replace with hyphens
+    name = re.sub(r'\s+', '-', name.strip())
+    return name
 
 
 def match_certificate(student_name, pdf_files, fname=None, lname=None):
@@ -131,9 +162,14 @@ def upload():
 
     students = []
     for _, row in df.iterrows():
-        fname = str(row[fname_col]).strip()
-        lname = str(row[lname_col]).strip()
-        name = str(row[name_col]).strip()
+        fname = str(row[fname_col]).strip() if fname_col and fname_col in row.index else None
+        lname = str(row[lname_col]).strip() if lname_col and lname_col in row.index else None
+
+        if name_col:
+            name = str(row[name_col]).strip()
+        else:
+            name = f"{fname} {lname}"
+
         email = str(row[email_col]).strip()
         cert = match_certificate(name, pdf_files, fname=fname, lname=lname)
         students.append({
@@ -143,6 +179,7 @@ def upload():
             'cert_path': os.path.join(cert_dir, cert) if cert else None,
             'status': 'ready' if cert else 'no_cert'
         })
+  
 
     return jsonify({'students': students, 'pdf_count': len(pdf_files)})
 
