@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 import pandas as pd
 import re
 import unicodedata
+from functools import wraps
 
 load_dotenv()  # Load .env from project root
 
@@ -21,6 +22,20 @@ UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 send_status = {}
+
+def require_smtp_config(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        smtp_active = os.getenv("SMTP_ACTIVE", "false").lower() == "true"
+        
+        cfg = get_smtp_config()
+        configured = bool(cfg.get('username') and cfg.get('password'))
+
+        if not configured or not smtp_active:
+            return render_template('404.html')
+
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 def get_smtp_config():
@@ -102,14 +117,20 @@ def robots():
     return app.send_static_file('robots.txt')
 
 @app.route('/')
+@require_smtp_config
 def index():
     return render_template('index.html')
 
 
 @app.route('/smtp-status')
+@require_smtp_config
 def smtp_status():
     cfg = get_smtp_config()
     configured = bool(cfg['username'] and cfg['password'])
+
+    if not configured:
+        return render_template('404.html')
+    
     return jsonify({
         'configured': configured,
         'host': cfg['host'],
@@ -121,6 +142,7 @@ def smtp_status():
 
 
 @app.route('/upload', methods=['POST'])
+@require_smtp_config
 def upload():
     csv_file = request.files.get('csv_file')
     zip_file = request.files.get('zip_file')
@@ -185,6 +207,7 @@ def upload():
 
 
 @app.route('/send', methods=['POST'])
+@require_smtp_config
 def send_emails():
     data = request.json
     students = data.get('students', [])
@@ -250,6 +273,7 @@ def send_emails():
 
 
 @app.route('/status/<task_id>')
+@require_smtp_config
 def get_status(task_id):
     status = send_status.get(task_id)
     if not status:
@@ -257,6 +281,7 @@ def get_status(task_id):
     return jsonify(status)
 
 @app.route('/storage-info')
+@require_smtp_config
 def storage_info():
     total_bytes = 0
     total_files = 0
@@ -271,6 +296,7 @@ def storage_info():
 
 
 @app.route('/cleanup', methods=['DELETE'])
+@require_smtp_config
 def cleanup():
     import shutil
     deleted = 0

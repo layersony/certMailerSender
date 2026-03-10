@@ -5,3 +5,4 @@ env_mailmerge/
 *.zip
 certificates/
 students.csv
+sed.sh
