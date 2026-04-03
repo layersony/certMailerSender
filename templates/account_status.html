@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Account Status</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/status.css') }}">
+</head>
+<body>
+
+<div class="status-card">
+  <h1>Account Status</h1>
+  <p>Your account cannot access the dashboard at this time.</p>
+  {% if status == "pending" %}
+    <div class="badge pending">Pending Approval</div>
+  {% elif status == "suspended" %}
+    <div class="badge suspended">Suspended</div>
+  {% endif %}
+</div>
+
+</body>
+</html>

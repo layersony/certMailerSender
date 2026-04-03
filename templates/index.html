@@ -5,194 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CertMail</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --ink: #0d0d0d;
-    --cream: #faf8f3;
-    --warm: #f0ebe0;
-    --accent: #c8502a;
-    --accent2: #2a6ec8;
-    --success: #1e8a4a;
-    --warn: #b88a00;
-    --border: #d8d2c4;
-    --card: #ffffff;
-    --shadow: 0 2px 12px rgba(0,0,0,0.07), 0 0 0 1px var(--border);
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--cream);
-    color: var(--ink);
-    min-height: 100vh;
-    line-height: 1.6;
-  }
-
-  header {
-    background: var(--ink);
-    color: var(--cream);
-    padding: 0 2.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 64px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .logo {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 1.3rem;
-    letter-spacing: -0.02em;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  .steps-nav { display: flex; gap: 0.25rem; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
-  .step-tab { padding: 0.35rem 1rem; border-radius: 100px; color: rgba(255,255,255,0.45); transition: all 0.2s; cursor: default; }
-  .step-tab.active { background: var(--accent); color: white; }
-  .step-tab.done { color: rgba(255,255,255,0.7); }
-
-  main { max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
-
-  .panel { display: none; animation: fadeUp 0.3s ease; }
-  .panel.active { display: block; }
-  @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-
-  .section-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 2rem; line-height: 1.1; margin-bottom: 0.4rem; letter-spacing: -0.03em; }
-  .section-sub { color: #666; font-size: 0.93rem; margin-bottom: 2rem; }
-
-  .card { background: var(--card); border-radius: 16px; box-shadow: var(--shadow); padding: 2rem; margin-bottom: 1.5rem; }
-  .card-title { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.06em; color: #888; margin-bottom: 1.25rem; }
-
-  .upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem; }
-  @media (max-width: 620px) { .upload-grid { grid-template-columns: 1fr; } }
-
-  .drop-zone {
-    border: 2px dashed var(--border); border-radius: 12px; padding: 2.5rem 1.5rem;
-    text-align: center; cursor: pointer; transition: all 0.2s; position: relative;
-  }
-  .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: rgba(200,80,42,0.04); }
-  .drop-zone.has-file { border-color: var(--success); background: rgba(30,138,74,0.04); }
-  .drop-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-  .drop-label { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.9rem; margin-bottom: 0.25rem; }
-  .drop-hint { font-size: 0.78rem; color: #999; }
-  .drop-filename { font-size: 0.8rem; color: var(--success); font-weight: 500; margin-top: 0.5rem; }
-
-  .field { margin-bottom: 1.25rem; }
-  .field label { display: block; font-size: 0.82rem; font-weight: 500; color: #555; margin-bottom: 0.4rem; letter-spacing: 0.02em; }
-  .field input, .field textarea {
-    width: 100%; border: 1.5px solid var(--border); border-radius: 8px;
-    padding: 0.65rem 0.9rem; font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
-    background: var(--cream); color: var(--ink); transition: border-color 0.2s, box-shadow 0.2s; outline: none;
-  }
-  .field input:focus, .field textarea:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(42,110,200,0.1); }
-  .field textarea { min-height: 110px; resize: vertical; line-height: 1.5; }
-  .field-note { font-size: 0.75rem; color: #999; margin-top: 0.3rem; }
-
-  .btn {
-    display: inline-flex; align-items: center; gap: 0.5rem;
-    padding: 0.7rem 1.6rem; border-radius: 8px;
-    font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.9rem;
-    letter-spacing: 0.01em; cursor: pointer; transition: all 0.15s; border: none;
-  }
-  .btn-primary { background: var(--ink); color: white; }
-  .btn-primary:hover { background: #222; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-  .btn-accent { background: var(--accent); color: white; }
-  .btn-accent:hover { background: #b04020; transform: translateY(-1px); }
-  .btn-success { background: var(--success); color: white; }
-  .btn-success:hover { background: #167a40; }
-  .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--ink); }
-  .btn-outline:hover { border-color: var(--ink); background: var(--warm); }
-  .btn-sm { padding: 0.4rem 0.9rem; font-size: 0.8rem; }
-  .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
-
-  .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
-  table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
-  thead th {
-    background: var(--warm); padding: 0.75rem 1rem; text-align: left;
-    font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 600;
-    letter-spacing: 0.06em; text-transform: uppercase; color: #666;
-    border-bottom: 1px solid var(--border); white-space: nowrap;
-  }
-  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: rgba(0,0,0,0.02); }
-  td { padding: 0.75rem 1rem; vertical-align: middle; }
-  td.name-cell { font-weight: 500; }
-
-  .badge {
-    display: inline-flex; align-items: center; gap: 0.3rem;
-    padding: 0.2rem 0.6rem; border-radius: 100px;
-    font-size: 0.73rem; font-weight: 600; letter-spacing: 0.02em;
-  }
-  .badge-ok { background: rgba(30,138,74,0.12); color: var(--success); }
-  .badge-warn { background: rgba(184,138,0,0.12); color: var(--warn); }
-  .badge-sent { background: rgba(42,110,200,0.12); color: var(--accent2); }
-
-  .actions-bar {
-    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
-    padding: 1.25rem 1.5rem; background: var(--ink); border-radius: 12px;
-    margin-bottom: 1.5rem; color: white;
-  }
-  .actions-bar .summary { flex: 1; font-size: 0.88rem; color: rgba(255,255,255,0.7); }
-  .actions-bar .summary strong { color: white; }
-
-  .progress-wrap { margin-top: 1.25rem; }
-  .progress-bar-bg { background: var(--border); border-radius: 100px; height: 8px; overflow: hidden; margin: 0.5rem 0; }
-  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--success)); border-radius: 100px; transition: width 0.3s; width: 0%; }
-  .progress-label { font-size: 0.83rem; color: #666; }
-
-  .alert { padding: 0.85rem 1.1rem; border-radius: 8px; font-size: 0.87rem; margin-bottom: 1rem; display: none; }
-  .alert.show { display: flex; align-items: flex-start; gap: 0.6rem; }
-  .alert-error { background: rgba(200,80,42,0.1); color: #b03010; border: 1px solid rgba(200,80,42,0.2); }
-
-  td.check-col, th.check-col { width: 40px; text-align: center; }
-  input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--accent2); cursor: pointer; }
-
-  .spinner { width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .empty-state { text-align: center; padding: 3rem 1rem; color: #aaa; }
-  .empty-state .empty-icon { font-size: 3rem; margin-bottom: 0.75rem; }
-
-   /* STORAGE BAR */
-  #storage-bar {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    background: var(--ink);
-    color: rgba(255,255,255,0.7);
-    font-size: 0.78rem;
-    padding: 0.5rem 2rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    z-index: 200;
-    border-top: 1px solid rgba(255,255,255,0.08);
-  }
-  #storage-bar .storage-label { flex: 1; }
-  #storage-bar .storage-label strong { color: white; }
-  #storage-bar .storage-size { font-family: monospace; color: #ffb366; font-size: 0.8rem; }
-  #storage-bar .btn-delete {
-    display: inline-flex; align-items: center; gap: 0.4rem;
-    padding: 0.3rem 0.9rem;
-    border-radius: 6px;
-    font-family: 'Syne', sans-serif;
-    font-size: 0.75rem;
-    font-weight: 600;
-    cursor: pointer;
-    border: 1.5px solid rgba(200,80,42,0.5);
-    background: transparent;
-    color: #ff8060;
-    transition: all 0.15s;
-  }
-  #storage-bar .btn-delete:hover { background: rgba(200,80,42,0.2); border-color: var(--accent); color: white; }
-  #storage-bar .btn-delete:disabled { opacity: 0.4; cursor: not-allowed; }
-  body { padding-bottom: 40px; }
-
-  #toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--ink); color: white; padding: 0.85rem 1.4rem; border-radius: 10px; font-size: 0.88rem; font-weight: 500; transform: translateY(80px); opacity: 0; transition: all 0.3s; z-index: 999; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
-  #toast.show { transform: translateY(0); opacity: 1; }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 </head>
 <body>
 
@@ -202,6 +15,10 @@
     <div class="step-tab active" id="tab-1">1 · Upload</div>
     <div class="step-tab" id="tab-2">2 · Preview</div>
     <div class="step-tab" id="tab-3">3 · Send</div>
+    {% if current_user.role == "admin" %}
+    <div><a class="btn btn-sm btn-primary" href="{{ url_for('admin_panel') }}">Admin</a></div>
+    {% endif %}
+    <div><a class="btn btn-sm btn-primary" href="{{ url_for('logout') }}">Logout</a></div>
   </nav>
 </header>
 
@@ -221,12 +38,14 @@
           <input type="file" id="csv-input" accept=".csv">
           <div class="drop-label">Student List (CSV)</div>
           <div class="drop-hint">firstname, lastname, fullname, email columns required</div>
+          <div class="drop-hint">Max size: 650 MB</div>
           <div class="drop-filename" id="csv-name"></div>
         </div>
         <div class="drop-zone" id="zip-drop">
           <input type="file" id="zip-input" accept=".zip">
           <div class="drop-label">Certificates (ZIP)</div>
           <div class="drop-hint">ZIP of PDFs named like Firstname-lastname_certificate.pdf</div>
+          <div class="drop-hint">Max size: 650 MB</div>
           <div class="drop-filename" id="zip-name"></div>
         </div>
       </div>
@@ -337,18 +156,44 @@ The Team</textarea>
   function setupDrop(zoneId, inputId, nameId) {
     const zone = document.getElementById(zoneId);
     const input = document.getElementById(inputId);
+    const MAX_SIZE = 650 * 1024 * 1024; // 650MB in bytes
+
+    function validateAndShow(file) {
+        if (file.size > MAX_SIZE) {
+            showError(nameId, zoneId, `✗ File too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Max 650MB.`);
+            input.value = '';
+            return;
+        }
+        showFileName(nameId, zoneId, file.name);
+    }
+
     zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
     zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
     zone.addEventListener('drop', e => {
-      e.preventDefault(); zone.classList.remove('dragover');
-      if (e.dataTransfer.files[0]) { input.files = e.dataTransfer.files; showFileName(nameId, zoneId, e.dataTransfer.files[0].name); }
+        e.preventDefault(); zone.classList.remove('dragover');
+        if (e.dataTransfer.files[0]) { input.files = e.dataTransfer.files; validateAndShow(e.dataTransfer.files[0]); }
     });
-    input.addEventListener('change', () => { if (input.files[0]) showFileName(nameId, zoneId, input.files[0].name); });
+    input.addEventListener('change', () => { if (input.files[0]) validateAndShow(input.files[0]); });
   }
+
   function showFileName(nameId, zoneId, name) {
-    document.getElementById(nameId).textContent = '✓ ' + name;
-    document.getElementById(zoneId).classList.add('has-file');
+      const nameEl = document.getElementById(nameId);
+      const zone = document.getElementById(zoneId);
+      nameEl.textContent = '✓ ' + name;
+      nameEl.style.color = '';  // Reset to default color
+      zone.classList.remove('has-error');
+      zone.classList.add('has-file');
   }
+
+  function showError(nameId, zoneId, message) {
+      const nameEl = document.getElementById(nameId);
+      const zone = document.getElementById(zoneId);
+      nameEl.textContent = message;
+      nameEl.style.color = '#e53e3e';  // Red error color
+      zone.classList.remove('has-file');
+      zone.classList.add('has-error');
+  }
+
   setupDrop('csv-drop', 'csv-input', 'csv-name');
   setupDrop('zip-drop', 'zip-input', 'zip-name');
 

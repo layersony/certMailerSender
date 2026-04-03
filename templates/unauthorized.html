@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Denied</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        .unauth-container {
+            max-width: 600px;
+            margin: 100px auto;
+            text-align: center;
+        }
+        .unauth-img {
+            width: 200px;
+            margin-bottom: 30px;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <div class="unauthorized-container">
+            <div class="unauthorized-card">
+                <div class="error-icon">
+                    <svg viewBox="0 0 24 24" width="64" height="64" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                    </svg>
+                </div>
+                
+                <h1>Unauthorized</h1>
+                <img src="https://cdn-icons-png.flaticon.com/512/10062/10062644.png" alt="Unauthorized" class="unauth-img">
+                <div>
+                    <a href="{{ url_for('login_page') }}" class="btn btn-danger">Back to Login</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

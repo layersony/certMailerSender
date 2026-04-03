@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CertMail · Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0d0d0d;
+    --cream: #faf8f3;
+    --warm: #f0ebe0;
+    --accent: #c8502a;
+    --accent2: #2a6ec8;
+    --success: #1e8a4a;
+    --warn: #b88a00;
+    --danger: #c8502a;
+    --border: #d8d2c4;
+    --card: #ffffff;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07), 0 0 0 1px var(--border);
+    --sidebar-w: 240px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── HEADER ─────────────────────────────────────────────────── */
+  header {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    flex-shrink: 0;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.3rem;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .logo-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--accent);
+    color: white;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    margin-left: 0.2rem;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.6);
+  }
+  .header-user {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .user-avatar {
+    width: 30px; height: 30px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 600; color: white;
+    border: 1.5px solid rgba(255,255,255,0.2);
+  }
+  .header-link {
+    color: rgba(255,255,255,0.5);
+    text-decoration: none;
+    font-size: 0.8rem;
+    padding: 0.35rem 0.8rem;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.12);
+    transition: all 0.15s;
+  }
+  .header-link:hover { background: rgba(255,255,255,0.08); color: white; }
+
+  /* ── BODY LAYOUT ─────────────────────────────────────────────── */
+  .layout {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* ── SIDEBAR ─────────────────────────────────────────────────── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--ink);
+    flex-shrink: 0;
+    padding: 1.5rem 0;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(255,255,255,0.06);
+    position: sticky;
+    top: 64px;
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+  }
+  .sidebar-section {
+    padding: 0 1rem 1.5rem;
+  }
+  .sidebar-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.28);
+    padding: 0 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.55);
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: 0.15rem;
+    text-decoration: none;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+  .nav-item.active { background: rgba(255,255,255,0.1); color: white; }
+  .nav-item .nav-icon { font-size: 0.95rem; width: 18px; text-align: center; opacity: 0.8; }
+  .nav-item .nav-badge {
+    margin-left: auto;
+    background: var(--accent);
+    color: white;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.1rem 0.45rem;
+    border-radius: 100px;
+    min-width: 20px;
+    text-align: center;
+  }
+  .sidebar-divider {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    margin: 0.5rem 1rem 1rem;
+  }
+
+  /* ── MAIN CONTENT ─────────────────────────────────────────────── */
+  .main-content {
+    flex: 1;
+    padding: 2.5rem 2rem 4rem;
+    min-width: 0;
+    overflow-y: auto;
+  }
+
+  /* ── PANELS ─────────────────────────────────────────────────── */
+  .panel { display: none; animation: fadeUp 0.25s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.85rem;
+    line-height: 1.1;
+    margin-bottom: 0.35rem;
+    letter-spacing: -0.03em;
+  }
+  .section-sub { color: #777; font-size: 0.9rem; margin-bottom: 2rem; }
+
+  /* ── STAT CARDS ─────────────────────────────────────────────── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .stat-card {
+    background: var(--card);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 1.4rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--stat-color, var(--accent2));
+    border-radius: 14px 14px 0 0;
+  }
+  .stat-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 0.6rem;
+  }
+  .stat-value {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 2rem;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--ink);
+  }
+  .stat-sub {
+    font-size: 0.75rem;
+    color: #aaa;
+    margin-top: 0.3rem;
+  }
+
+  /* ── CARDS ─────────────────────────────────────────────────── */
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    gap: 1rem;
+  }
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #888;
+  }
+
+  /* ── TABLES ─────────────────────────────────────────────────── */
+  .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+  thead th {
+    background: var(--warm);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #777;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(0,0,0,0.018); }
+  td { padding: 0.75rem 1rem; vertical-align: middle; }
+
+  /* ── BADGES ─────────────────────────────────────────────────── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    padding: 0.2rem 0.65rem; border-radius: 100px;
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+  .badge-ok      { background: rgba(30,138,74,0.1);   color: var(--success); }
+  .badge-warn    { background: rgba(184,138,0,0.1);    color: var(--warn); }
+  .badge-error   { background: rgba(200,80,42,0.1);    color: var(--accent); }
+  .badge-info    { background: rgba(42,110,200,0.1);   color: var(--accent2); }
+  .badge-neutral { background: rgba(0,0,0,0.06);       color: #666; }
+  .badge-active  { background: rgba(30,138,74,0.1);    color: var(--success); }
+  .badge-inactive{ background: rgba(0,0,0,0.06);       color: #999; }
+
+  /* ── BUTTONS ─────────────────────────────────────────────────── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    padding: 0.65rem 1.4rem; border-radius: 8px;
+    font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.88rem;
+    letter-spacing: 0.01em; cursor: pointer; transition: all 0.15s; border: none;
+  }
+  .btn-primary  { background: var(--ink); color: white; }
+  .btn-primary:hover { background: #222; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.18); }
+  .btn-accent   { background: var(--accent); color: white; }
+  .btn-accent:hover { background: #b04020; transform: translateY(-1px); }
+  .btn-success  { background: var(--success); color: white; }
+  .btn-success:hover { background: #167a40; }
+  .btn-danger   { background: rgba(200,80,42,0.1); color: var(--accent); border: 1px solid rgba(200,80,42,0.2); }
+  .btn-danger:hover { background: var(--accent); color: white; }
+  .btn-outline  { background: transparent; border: 1.5px solid var(--border); color: var(--ink); }
+  .btn-outline:hover { border-color: var(--ink); background: var(--warm); }
+  .btn-ghost    { background: transparent; border: none; color: #888; padding: 0.4rem 0.6rem; }
+  .btn-ghost:hover { color: var(--ink); background: var(--warm); border-radius: 6px; }
+  .btn-sm { padding: 0.38rem 0.85rem; font-size: 0.78rem; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+
+  /* ── FORMS ─────────────────────────────────────────────────── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+  .field { margin-bottom: 1.1rem; }
+  .field label {
+    display: block; font-size: 0.8rem; font-weight: 500; color: #555;
+    margin-bottom: 0.38rem; letter-spacing: 0.02em;
+  }
+  .field input, .field select, .field textarea {
+    width: 100%; border: 1.5px solid var(--border); border-radius: 8px;
+    padding: 0.6rem 0.85rem; font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+    background: var(--cream); color: var(--ink);
+    transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+    appearance: none;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: var(--accent2);
+    box-shadow: 0 0 0 3px rgba(42,110,200,0.1);
+  }
+  .field-note { font-size: 0.73rem; color: #aaa; margin-top: 0.28rem; }
+  .field-full { grid-column: 1 / -1; }
+  .toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.85rem 1rem;
+    background: var(--cream); border-radius: 8px;
+    border: 1.5px solid var(--border);
+  }
+  .toggle-info .toggle-label { font-size: 0.88rem; font-weight: 500; }
+  .toggle-info .toggle-desc  { font-size: 0.75rem; color: #999; margin-top: 0.1rem; }
+  .toggle {
+    position: relative; width: 44px; height: 24px;
+    cursor: pointer; flex-shrink: 0;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute; inset: 0;
+    background: #ccc; border-radius: 100px;
+    transition: 0.2s;
+  }
+  .toggle-slider::before {
+    content: ''; position: absolute;
+    width: 18px; height: 18px; left: 3px; bottom: 3px;
+    background: white; border-radius: 50%; transition: 0.2s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  .toggle input:checked + .toggle-slider { background: var(--success); }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+  /* ── ALERTS ─────────────────────────────────────────────────── */
+  .alert {
+    padding: 0.85rem 1.1rem; border-radius: 8px; font-size: 0.86rem;
+    margin-bottom: 1rem; display: none;
+  }
+  .alert.show { display: flex; align-items: flex-start; gap: 0.6rem; }
+  .alert-error   { background: rgba(200,80,42,0.09);  color: #b03010; border: 1px solid rgba(200,80,42,0.18); }
+  .alert-success { background: rgba(30,138,74,0.09);  color: #176338; border: 1px solid rgba(30,138,74,0.18); }
+  .alert-info    { background: rgba(42,110,200,0.09); color: #1a4f99; border: 1px solid rgba(42,110,200,0.18); }
+
+  /* ── EMPTY STATE ─────────────────────────────────────────────── */
+  .empty-state { text-align: center; padding: 3.5rem 1rem; color: #bbb; }
+  .empty-state .empty-icon { font-size: 2.8rem; margin-bottom: 0.75rem; }
+  .empty-state p { font-size: 0.88rem; }
+
+  /* ── MODAL ─────────────────────────────────────────────────── */
+  .modal-bg {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(3px);
+    z-index: 500; display: none; align-items: center; justify-content: center;
+    padding: 1.5rem;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: var(--card); border-radius: 20px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.18), 0 0 0 1px var(--border);
+    padding: 2rem; width: 100%; max-width: 520px;
+    animation: modalIn 0.22s ease;
+    max-height: 90vh; overflow-y: auto;
+  }
+  @keyframes modalIn { from { opacity:0; transform: scale(0.96) translateY(8px); } to { opacity:1; transform: none; } }
+  .modal-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 1.5rem; gap: 1rem;
+  }
+  .modal-title {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.25rem;
+    letter-spacing: -0.02em;
+  }
+  .modal-subtitle { font-size: 0.82rem; color: #999; margin-top: 0.2rem; }
+  .modal-close {
+    background: var(--warm); border: none; border-radius: 8px;
+    width: 32px; height: 32px; cursor: pointer; font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    color: #777; transition: all 0.15s; flex-shrink: 0;
+  }
+  .modal-close:hover { background: var(--border); color: var(--ink); }
+  .modal-footer {
+    display: flex; gap: 0.75rem; justify-content: flex-end;
+    margin-top: 1.75rem; padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── ACTION MENU ─────────────────────────────────────────────── */
+  .action-menu { position: relative; display: inline-block; }
+  .action-menu-dropdown {
+    position: absolute; right: 0; top: calc(100% + 6px);
+    background: var(--card); border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 0 0 1px var(--border);
+    padding: 0.4rem; min-width: 160px; z-index: 200;
+    display: none; animation: fadeUp 0.15s ease;
+  }
+  .action-menu.open .action-menu-dropdown { display: block; }
+  .action-menu-item {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.55rem 0.75rem; border-radius: 6px;
+    font-size: 0.84rem; cursor: pointer; transition: background 0.1s;
+    color: var(--ink); border: none; background: none; width: 100%; text-align: left;
+  }
+  .action-menu-item:hover { background: var(--warm); }
+  .action-menu-item.danger { color: var(--accent); }
+  .action-menu-item.danger:hover { background: rgba(200,80,42,0.08); }
+
+  /* ── LOG FILTERS ─────────────────────────────────────────────── */
+  .filter-bar {
+    display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.25rem;
+  }
+  .filter-bar select, .filter-bar input {
+    border: 1.5px solid var(--border); border-radius: 8px;
+    padding: 0.5rem 0.85rem; font-family: 'DM Sans', sans-serif; font-size: 0.84rem;
+    background: var(--cream); color: var(--ink); outline: none;
+    transition: border-color 0.2s;
+  }
+  .filter-bar select:focus, .filter-bar input:focus { border-color: var(--accent2); }
+
+  /* ── SMTP PASSWORD FIELD ─────────────────────────────────────── */
+  .pass-wrap { position: relative; }
+  .pass-wrap input { padding-right: 2.8rem; }
+  .pass-toggle {
+    position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer; color: #aaa;
+    font-size: 0.85rem; padding: 0.25rem;
+  }
+  .pass-toggle:hover { color: var(--ink); }
+
+  /* ── ACTIVITY PILL ─────────────────────────────────────────────── */
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 4px; }
+  .dot-green  { background: var(--success); box-shadow: 0 0 0 2px rgba(30,138,74,0.2); }
+  .dot-yellow { background: var(--warn); }
+  .dot-red    { background: var(--accent); }
+  .dot-grey   { background: #ccc; }
+
+  /* ── TOAST ─────────────────────────────────────────────────── */
+  #toast {
+    position: fixed; bottom: 2rem; right: 2rem;
+    background: var(--ink); color: white;
+    padding: 0.85rem 1.4rem; border-radius: 10px;
+    font-size: 0.86rem; font-weight: 500;
+    transform: translateY(80px); opacity: 0; transition: all 0.3s;
+    z-index: 999; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    max-width: 320px;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ── SPINNER ─────────────────────────────────────────────────── */
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.3); border-top-color: white;
+    border-radius: 50%; animation: spin 0.7s linear infinite; display: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner-dark {
+    border-color: rgba(0,0,0,0.12); border-top-color: var(--ink);
+  }
+
+  /* ── RESPONSIVE ─────────────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main-content { padding: 1.5rem 1rem 3rem; }
+  }
+
+  /* ── SEARCH BAR ─────────────────────────────────────────────── */
+  .search-input {
+    border: 1.5px solid var(--border); border-radius: 8px;
+    padding: 0.5rem 0.9rem 0.5rem 2.2rem; font-family: 'DM Sans', sans-serif;
+    font-size: 0.84rem; background: var(--cream); color: var(--ink);
+    outline: none; transition: border-color 0.2s; width: 220px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23aaa' stroke-width='2.5'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: 0.65rem center;
+  }
+  .search-input:focus { border-color: var(--accent2); }
+
+  /* ── PAGINATION ─────────────────────────────────────────────── */
+  .pagination {
+    display: flex; align-items: center; gap: 0.4rem;
+    padding-top: 1rem; justify-content: flex-end;
+  }
+  .page-btn {
+    width: 32px; height: 32px; border-radius: 6px; border: 1.5px solid var(--border);
+    background: transparent; cursor: pointer; font-size: 0.8rem; font-family: 'Syne', sans-serif;
+    font-weight: 600; transition: all 0.15s; color: var(--ink);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .page-btn:hover { background: var(--warm); border-color: var(--ink); }
+  .page-btn.active { background: var(--ink); color: white; border-color: var(--ink); }
+  .page-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ─────────────────────────────────────────── -->
+<header>
+  <div class="logo">
+    CertMail
+    <span class="logo-badge">Admin</span>
+  </div>
+  <div class="header-right">
+    <a href="/" class="header-link"><- App</a>
+    <div class="header-user">
+      <div class="user-avatar" id="user-initials">—</div>
+      <span id="user-email-display" style="color:rgba(255,255,255,0.7)">Loading…</span>
+    </div>
+    <a href="/logout" class="header-link">Sign out</a>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ── SIDEBAR ──────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Overview</div>
+      <button class="nav-item active" onclick="switchPanel('dashboard', this)">
+        <span class="nav-icon">◈</span> Dashboard
+      </button>
+    </div>
+
+    <hr class="sidebar-divider">
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Access</div>
+      <button class="nav-item" onclick="switchPanel('users', this)">
+        <span class="nav-icon">⊙</span> Users
+        <span class="nav-badge" id="users-badge">—</span>
+      </button>
+      <button class="nav-item" onclick="switchPanel('logs', this)">
+        <span class="nav-icon">≡</span> Audit Logs
+      </button>
+    </div>
+
+    <hr class="sidebar-divider">
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Config</div>
+      <button class="nav-item" onclick="switchPanel('smtp', this)">
+        <span class="nav-icon">◎</span> SMTP
+        <span class="nav-badge" id="smtp-badge" style="display:none">!</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ─────────────────────────────────────────── -->
+  <main class="main-content">
+
+    <!-- ══ DASHBOARD ══════════════════════════════════════ -->
+    <div class="panel active" id="panel-dashboard">
+      <h1 class="section-title">Dashboard</h1>
+      <p class="section-sub">System overview and recent activity.</p>
+
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card" style="--stat-color: var(--accent2)">
+          <div class="stat-label">Total Users</div>
+          <div class="stat-value" id="stat-users">—</div>
+          <div class="stat-sub">registered accounts</div>
+        </div>
+        <div class="stat-card" style="--stat-color: var(--success)">
+          <div class="stat-label">Logins (all time)</div>
+          <div class="stat-value" id="stat-logins">—</div>
+          <div class="stat-sub">successful sessions</div>
+        </div>
+        <div class="stat-card" style="--stat-color: var(--accent)">
+          <div class="stat-label">Emails Sent</div>
+          <div class="stat-value" id="stat-emails">—</div>
+          <div class="stat-sub">bulk send jobs</div>
+        </div>
+        <div class="stat-card" style="--stat-color: var(--warn)">
+          <div class="stat-label">Failed Actions</div>
+          <div class="stat-value" id="stat-failures">—</div>
+          <div class="stat-sub">errors logged</div>
+        </div>
+      </div>
+
+      <div class="card">  
+        
+        <div class="card-header">
+          <div class="card-title">Pending User Approvals</div>
+
+        </div>
+        <div class="card-body">
+          <p id="pendingCount_users-badge">-</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Action Breakdown</div>
+          <button class="btn btn-outline btn-sm" onclick="loadDashboard()">↻ Refresh</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Action</th>
+                <th>Total</th>
+                <th>Failures</th>
+                <th>Success Rate</th>
+              </tr>
+            </thead>
+            <tbody id="action-summary-body">
+              <tr><td colspan="4"><div class="empty-state"><div class="empty-icon">📊</div><p>Loading…</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Recent Activity</div>
+          <button class="btn btn-ghost btn-sm" onclick="switchPanel('logs', document.querySelector('.nav-item:nth-child(2)'))">View all →</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>User</th>
+                <th>Action</th>
+                <th>Detail</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="recent-activity-body">
+              <tr><td colspan="5"><div class="empty-state"><div class="empty-icon">🕐</div><p>Loading…</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ USERS ═══════════════════════════════════════════ -->
+    <div class="panel" id="panel-users">
+      <h1 class="section-title">Users</h1>
+      <p class="section-sub">All registered Google accounts and their login activity.</p>
+
+      <div id="users-alert" class="alert"></div>
+
+      <div class="card" style="padding: 0;">
+        <div class="card-header" style="padding: 1.25rem 1.5rem 0; margin-bottom: 0;">
+          <div class="card-title">Registered Accounts</div>
+          <div style="display:flex; gap: 0.6rem; padding-bottom: 1.25rem;">
+            <input class="search-input" id="user-search" placeholder="Search name or email…" oninput="filterUsers()">
+            <button class="btn btn-outline btn-sm" onclick="loadUsers()">↻</button>
+          </div>
+        </div>
+        <div class="table-wrap" style="border: none; border-radius: 0 0 16px 16px; min-height: 250px;">
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Last Login</th>
+                <th>Logins</th>
+                <th>Status</th>
+                <th style="width:50px"></th>
+              </tr>
+            </thead>
+            <tbody id="users-table-body">
+              <tr><td colspan="7"><div class="empty-state"><div class="empty-icon">👤</div><p>Loading…</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ AUDIT LOGS ══════════════════════════════════════ -->
+    <div class="panel" id="panel-logs">
+      <h1 class="section-title">Audit Logs</h1>
+      <p class="section-sub">Every action taken in the system, in chronological order.</p>
+
+      <div class="filter-bar">
+        <select id="log-action-filter" onchange="loadLogs()">
+          <option value="">All actions</option>
+          <option>LOGIN</option>
+          <option>LOGOUT</option>
+          <option>UPLOAD</option>
+          <option>SEND_EMAILS</option>
+          <option>SEND_EMAILS_START</option>
+          <option>CLEANUP</option>
+          <option>AUTH_FAILED</option>
+          <option>ACCESS_DENIED</option>
+          <option>SMTP_CREATE</option>
+          <option>SMTP_UPDATE</option>
+          <option>SMTP_ACTIVATE</option>
+          <option>SMTP_DELETE</option>
+          <option>VIEW_ADMIN_LOGS</option>
+        </select>
+        <input type="date" id="log-since-filter" onchange="loadLogs()" title="Show logs since this date">
+        <input class="search-input" id="log-search" placeholder="Filter by email…" oninput="filterLogs()" style="width: 200px;">
+        <button class="btn btn-outline btn-sm" onclick="loadLogs()">↻ Refresh</button>
+      </div>
+
+      <div class="card" style="padding: 0;">
+        <div class="table-wrap" style="border: none; border-radius: 16px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>User</th>
+                <th>Action</th>
+                <th>Detail</th>
+                <th>IP Address</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="logs-table-body">
+              <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">≡</div><p>Loading…</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="pagination" id="logs-pagination"></div>
+    </div>
+
+    <!-- ══ SMTP CONFIG ═════════════════════════════════════ -->
+    <div class="panel" id="panel-smtp">
+      <h1 class="section-title">SMTP Configuration</h1>
+      <p class="section-sub">Manage outgoing mail server profiles. Only one profile can be active at a time.</p>
+
+      <div id="smtp-alert" class="alert"></div>
+
+      <div class="card-header" style="margin-bottom: 1.25rem;">
+        <div></div>
+        <button class="btn btn-primary" onclick="openSmtpModal()">+ Add Profile</button>
+      </div>
+
+      <div id="smtp-list">
+        <div class="empty-state"><div class="empty-icon">◎</div><p>Loading…</p></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ═══ SMTP MODAL ══════════════════════════════════════════════ -->
+<div class="modal-bg" id="smtp-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="smtp-modal-title">Add SMTP Profile</div>
+        <div class="modal-subtitle" id="smtp-modal-sub">Configure an outgoing mail server.</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('smtp-modal')">✕</button>
+    </div>
+
+    <div id="smtp-modal-alert" class="alert"></div>
+
+    <input type="hidden" id="smtp-edit-id">
+
+    <div class="form-grid">
+      <div class="field field-full">
+        <label>Profile Label</label>
+        <input type="text" id="smtp-label" placeholder="e.g. Gmail Production">
+      </div>
+      <div class="field">
+        <label>SMTP Host</label>
+        <input type="text" id="smtp-host" placeholder="smtp.gmail.com">
+      </div>
+      <div class="field">
+        <label>Port</label>
+        <input type="number" id="smtp-port" value="587" min="1" max="65535">
+      </div>
+      <div class="field">
+        <label>Username</label>
+        <input type="email" id="smtp-username" placeholder="you@gmail.com">
+      </div>
+      <div class="field">
+        <label>Password / App Password</label>
+        <div class="pass-wrap">
+          <input type="password" id="smtp-password" placeholder="••••••••••••">
+          <button type="button" class="pass-toggle" onclick="togglePass('smtp-password', this)" title="Show/hide password">👁</button>
+        </div>
+        <div class="field-note" id="smtp-pass-note">Leave blank to keep existing password when editing.</div>
+      </div>
+      <div class="field">
+        <label>From Email <span style="color:#bbb;font-weight:400">(optional)</span></label>
+        <input type="email" id="smtp-from" placeholder="Defaults to username">
+      </div>
+    </div>
+
+    <div class="field" style="margin-top: 0.5rem;">
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <div class="toggle-label">Enable STARTTLS</div>
+          <div class="toggle-desc">Recommended for most providers (port 587)</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="smtp-tls" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <div class="toggle-label">Set as Active Profile</div>
+          <div class="toggle-desc">This profile will be used for all outgoing mail</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="smtp-make-active">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('smtp-modal')">Cancel</button>
+      <button class="btn btn-primary" id="smtp-save-btn" onclick="saveSmtp()">
+        <span id="smtp-save-spinner" class="spinner"></span>
+        Save Profile
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ USER DETAIL MODAL ══════════════════════════════════════ -->
+<div class="modal-bg" id="user-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="user-modal-name">User</div>
+        <div class="modal-subtitle" id="user-modal-email"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('user-modal')">✕</button>
+    </div>
+    <div id="user-modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('user-modal')">Close</button>
+      <button class="btn btn-danger btn-sm" id="user-toggle-btn" onclick="toggleUserActive()">Disable Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CONFIRM MODAL ══════════════════════════════════════════ -->
+<div class="modal-bg" id="confirm-modal">
+  <div class="modal" style="max-width: 420px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="confirm-title">Confirm</div>
+        <div class="modal-subtitle" id="confirm-sub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('confirm-modal')">✕</button>
+    </div>
+    <p id="confirm-body" style="font-size:0.9rem;color:#555;line-height:1.6;"></p>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('confirm-modal')">Cancel</button>
+      <button class="btn btn-danger" id="confirm-ok-btn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// State
+// ─────────────────────────────────────────────────────────────
+let allUsers = [];
+let allLogs  = [];
+let currentUserId = null;
+let currentUserActive = true;
+const LOGS_PER_PAGE = 50;
+let logsPage = 0;
+
+// ─────────────────────────────────────────────────────────────
+// Navigation
+// ─────────────────────────────────────────────────────────────
+function switchPanel(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (name === 'dashboard') loadDashboard();
+  if (name === 'users')     loadUsers();
+  if (name === 'logs')      loadLogs();
+  if (name === 'smtp')      loadSmtp();
+}
+
+// ─────────────────────────────────────────────────────────────
+// Bootstrap on load
+// ─────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  loadHeaderUser();
+  loadDashboard();
+  // Close action menus on outside click
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.action-menu')) {
+      document.querySelectorAll('.action-menu.open').forEach(m => m.classList.remove('open'));
+    }
+  });
+  // Close modals on backdrop click
+  document.querySelectorAll('.modal-bg').forEach(bg => {
+    bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); });
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// Header user
+// ─────────────────────────────────────────────────────────────
+async function loadHeaderUser() {
+  try {
+    const res = await fetch('/admin/users');
+    // We just use the first user that matches to display current session
+    // In a real app this would be /admin/me
+    // For now just show placeholder
+  } catch (e) {}
+  // Placeholder — replace with actual session endpoint if available
+  document.getElementById('user-initials').textContent = 'A';
+  document.getElementById('user-email-display').textContent = 'Admin';
+}
+
+// ─────────────────────────────────────────────────────────────
+// Dashboard
+// ─────────────────────────────────────────────────────────────
+async function loadDashboard() {
+  try {
+    const [usersRes, summaryRes, logsRes] = await Promise.all([
+      fetch('/admin/users'),
+      fetch('/admin/logs/summary'),
+      fetch('/admin/logs?limit=10')
+    ]);
+    const users   = await usersRes.json();
+    const summary = await summaryRes.json();
+    const logs    = await logsRes.json();
+
+    // Stats
+    document.getElementById('stat-users').textContent = users.length;
+    document.getElementById('users-badge').textContent = users.length;
+
+    // Pending approvals badge
+    const pendingCount = users.filter(u => u.status === 'pending').length;
+    document.getElementById('pendingCount_users-badge').textContent = pendingCount;
+
+    const loginRow  = summary.find(r => r.action === 'LOGIN');
+    const emailRow  = summary.find(r => r.action === 'SEND_EMAILS');
+    const totalFail = summary.reduce((a, r) => a + (r.failures || 0), 0);
+
+    document.getElementById('stat-logins').textContent   = loginRow?.count  ?? 0;
+    document.getElementById('stat-emails').textContent   = emailRow?.count  ?? 0;
+    document.getElementById('stat-failures').textContent = totalFail;
+
+    // Action breakdown table
+    const tbody = document.getElementById('action-summary-body');
+    if (!summary.length) {
+      tbody.innerHTML = emptyRow(4, 'No activity recorded yet.');
+    } else {
+      tbody.innerHTML = summary.map(r => {
+        const rate = r.count > 0 ? Math.round(((r.count - r.failures) / r.count) * 100) : 100;
+        const color = rate === 100 ? 'var(--success)' : rate >= 80 ? 'var(--warn)' : 'var(--accent)';
+        return `<tr>
+          <td><code style="font-size:0.8rem;background:var(--warm);padding:0.15rem 0.5rem;border-radius:4px">${esc(r.action)}</code></td>
+          <td><strong>${r.count}</strong></td>
+          <td>${r.failures > 0 ? `<span style="color:var(--accent)">${r.failures}</span>` : '<span style="color:#ccc">0</span>'}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:0.6rem;">
+              <div style="flex:1;height:5px;background:var(--border);border-radius:100px;min-width:60px;max-width:120px">
+                <div style="height:100%;width:${rate}%;background:${color};border-radius:100px;transition:width 0.4s"></div>
+              </div>
+              <span style="font-size:0.8rem;color:${color};font-weight:600">${rate}%</span>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    // Recent activity
+    const rbody = document.getElementById('recent-activity-body');
+    rbody.innerHTML = logs.length
+      ? logs.map(log => logRow(log, true)).join('')
+      : emptyRow(5, 'No recent activity.');
+
+  } catch (e) {
+    console.error('Dashboard load error:', e);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Users
+// ─────────────────────────────────────────────────────────────
+async function loadUsers() {
+  try {
+    const res = await fetch('/admin/users');
+    allUsers = await res.json();
+    renderUsers(allUsers);
+  } catch (e) {
+    showAlert('users-alert', 'Failed to load users: ' + e.message, 'error');
+  }
+}
+
+function renderUsers(users) {
+  const tbody = document.getElementById('users-table-body');
+  if (!users.length) {
+    tbody.innerHTML = emptyRow(7, 'No users registered yet.');
+    return;
+  }
+  tbody.innerHTML = users.map(u => {
+    const initials = (u.name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const statusBadge = (() => {
+      switch (u.status) {
+        case "active":
+          return `<span class="badge badge-active"><span class="dot dot-green"></span>Active</span>`;
+        case "pending":
+          return `<span class="badge badge-neutral"><span class="dot dot-yellow"></span>Pending</span>`;
+        case "suspended":
+          return `<span class="badge badge-error"><span class="dot dot-red"></span>Suspended</span>`;
+        default:
+          return `<span class="badge badge-inactive"><span class="dot dot-grey"></span>Unknown</span>`;
+      }
+    })();
+    const statusText = u.status === 'pending' ? 'Activate Account' 
+                 : u.status === 'active' ? 'Deactivate Account' 
+                 : 'Reactivate Account';
+    return `<tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:0.65rem;">
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--warm);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:0.72rem;font-weight:700;color:#666;flex-shrink:0">${esc(initials)}</div>
+          <div style="font-weight:500;font-size:0.88rem">${esc(u.name)}</div>
+        </div>
+      </td>
+      <td style="color:var(--accent2);font-size:0.85rem">${esc(u.email)}</td>
+      <td style="font-size:0.82rem;color:#888">${u.role}</td>
+      <td style="font-size:0.82rem;color:#888">${fmtDate(u.last_login_at)}</td>
+      <td><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.85rem">${u.login_count}</span></td>
+      <td>${statusBadge}</td>
+      <td>
+        <div class="action-menu" id="user-menu-${u.google_id}">
+          <button class="btn btn-ghost btn-sm" onclick="toggleMenu('user-menu-${u.google_id}')">⋯</button>
+          <div class="action-menu-dropdown">
+            <button class="action-menu-item" onclick="openUserModal(${JSON.stringify(u).replace(/"/g,'&quot;')})">View details</button>
+            <button class="action-menu-item" onclick="viewUserLogs('${esc(u.google_id)}')">View logs</button>
+            <button class="action-menu-item" onclick="updateRole('${esc(u.google_id)}')">Update Role</button>
+            <button class="action-menu-item" onclick="toggleStatus('${ u.google_id }', '${ u.email }')">
+              ${statusText}
+            </button>
+            <button class="action-menu-item danger" onclick="confirmToggleUser('${esc(u.google_id)}', ${u.is_active}, '${esc(u.name)}')">${u.is_active ? '⊘ Disable' : '✓ Enable'} account</button>
+          </div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterUsers() {
+  const q = document.getElementById('user-search').value.toLowerCase();
+  const filtered = allUsers.filter(u =>
+    u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+  );
+  renderUsers(filtered);
+}
+
+function openUserModal(user) {
+  closeAllMenus();
+  currentUserId = user.google_id;
+  currentUserActive = user.is_active;
+
+  document.getElementById('user-modal-name').textContent  = user.name;
+  document.getElementById('user-modal-email').textContent = user.email;
+
+  document.getElementById('user-modal-body').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;">
+      ${infoCell('Google ID',   user.google_id)}
+      ${infoCell('Status',      user.is_active ? '✓ Active' : '⊘ Disabled')}
+      ${infoCell('First Seen',  fmtDateFull(user.first_seen_at))}
+      ${infoCell('Last Login',  fmtDateFull(user.last_login_at))}
+      ${infoCell('Login Count', user.login_count)}
+    </div>`;
+
+  const btn = document.getElementById('user-toggle-btn');
+  btn.textContent = user.is_active ? 'Disable Account' : 'Enable Account';
+  btn.className   = user.is_active ? 'btn btn-danger btn-sm' : 'btn btn-success btn-sm';
+
+  document.getElementById('user-modal').classList.add('open');
+}
+
+async function updateRole(googleId) {
+  try {
+    const res = await fetch(`/admin/users/${googleId}/toggle-role`, { method: 'POST' });
+    if (!res.ok) throw new Error((await res.json()).error || 'Failed');
+    const data = await res.json();
+    if (data.success) {
+      user.role = data.role;
+      showToast(`Role updated to ${data.role}`);
+      loadUsers();
+    }
+  }
+  catch (e) {
+    showToast('Error: ' + e.message);
+  }
+}
+
+async function toggleUserActive() {
+  if (!currentUserId) return;
+  const newState = !currentUserActive;
+  try {
+    const res = await fetch(`/admin/users/${currentUserId}/active`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ active: newState })
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Failed');
+    closeModal('user-modal');
+    showToast(newState ? '✓ Account enabled' : '⊘ Account disabled');
+    loadUsers();
+  } catch (e) {
+    showToast('Error: ' + e.message);
+  }
+}
+
+async function toggleStatus(googleId, email) {
+  try {
+    const res = await fetch(`/admin/users/${email}/togglestatus`, { method: 'POST' });
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || 'Failed to Activate Account');
+
+    showToast(`Account Status Updated`);
+    loadUsers();
+  } catch (e) {
+    showToast("Error: " + e.message);
+  }
+}
+
+// Helper to render status badge
+function getStatusBadge(u) {
+  const colorMap = {
+    pending: "badge-pending",
+    active: "badge-active",
+    suspended: "badge-suspended"
+  };
+  const dotMap = {
+    pending: "dot-orange",
+    active: "dot-green",
+    suspended: "dot-red"
+  };
+
+  return `<span class="badge ${colorMap[u.status]}">
+            <span class="dot ${dotMap[u.status]}"></span>
+            ${capitalize(u.status)}
+          </span>`;
+}
+
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function confirmToggleUser(googleId, isActive, name) {
+  closeAllMenus();
+  const newState = !isActive;
+  openConfirm(
+    (newState ? 'Enable' : 'Disable') + ' Account',
+    `${name}`,
+    `Are you sure you want to ${newState ? 'enable' : 'disable'} this account? ${newState ? 'The user will be able to log in again.' : 'The user will no longer be able to access the system.'}`,
+    async () => {
+      const res = await fetch(`/admin/users/${googleId}/active`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ active: newState })
+      });
+      if (!res.ok) throw new Error((await res.json()).error || 'Failed');
+      showToast(newState ? '✓ Account enabled' : '⊘ Account disabled');
+      loadUsers();
+    }
+  );
+}
+
+function viewUserLogs(googleId) {
+  closeAllMenus();
+  document.getElementById('log-action-filter').value = '';
+  // Switch to logs panel and filter by this user
+  switchPanel('logs', document.querySelectorAll('.nav-item')[2]);
+  // small delay to let panel render
+  setTimeout(() => loadLogs(googleId), 100);
+}
+
+// ─────────────────────────────────────────────────────────────
+// Audit Logs
+// ─────────────────────────────────────────────────────────────
+async function loadLogs(forceGoogleId) {
+  logsPage = 0;
+  try {
+    const action = document.getElementById('log-action-filter').value;
+    const since  = document.getElementById('log-since-filter').value;
+    let url = `/admin/logs?limit=200`;
+    if (action) url += `&action=${encodeURIComponent(action)}`;
+    if (since)  url += `&since=${encodeURIComponent(since + 'T00:00:00Z')}`;
+    if (forceGoogleId) url += `&google_id=${encodeURIComponent(forceGoogleId)}`;
+
+    const res = await fetch(url);
+    allLogs = await res.json();
+    renderLogs();
+  } catch (e) {
+    document.getElementById('logs-table-body').innerHTML = emptyRow(6, 'Failed to load logs.');
+  }
+}
+
+function filterLogs() {
+  renderLogs();
+}
+
+function renderLogs() {
+  const q = (document.getElementById('log-search').value || '').toLowerCase();
+  const filtered = allLogs.filter(l =>
+    !q || (l.email && l.email.includes(q))
+  );
+
+  const start = logsPage * LOGS_PER_PAGE;
+  const page  = filtered.slice(start, start + LOGS_PER_PAGE);
+  const tbody = document.getElementById('logs-table-body');
+
+  tbody.innerHTML = page.length
+    ? page.map(l => logRow(l, false)).join('')
+    : emptyRow(6, 'No logs match your filters.');
+
+  renderPagination(filtered.length);
+}
+
+function logRow(log, compact) {
+  const actionClass = log.action.includes('FAIL') || log.action.includes('DENIED')
+    ? 'badge-error'
+    : log.action === 'LOGIN'   ? 'badge-info'
+    : log.action === 'LOGOUT'  ? 'badge-neutral'
+    : log.action.includes('SEND') ? 'badge-ok'
+    : 'badge-neutral';
+
+  const statusBadge = log.success
+    ? `<span class="badge badge-ok">✓ ok</span>`
+    : `<span class="badge badge-error">✕ fail</span>`;
+
+  const detail = log.detail ? `<span style="font-size:0.78rem;color:#999;font-family:monospace">${esc(log.detail.slice(0,60))}${log.detail.length>60?'…':''}</span>` : '<span style="color:#ddd">—</span>';
+
+  return `<tr>
+    <td style="font-size:0.78rem;color:#888;white-space:nowrap">${fmtTime(log.timestamp)}</td>
+    <td style="font-size:0.82rem">${log.email ? esc(log.email) : '<span style="color:#ccc">—</span>'}</td>
+    <td><span class="badge ${actionClass}">${esc(log.action)}</span></td>
+    <td>${detail}</td>
+    <td style="font-size:0.78rem;color:#bbb;font-family:monospace">${log.ip_address ? esc(log.ip_address) : '—'}</td>
+    <td>${statusBadge}</td>
+  </tr>`;
+}
+
+function renderPagination(total) {
+  const pages = Math.ceil(total / LOGS_PER_PAGE);
+  const wrap  = document.getElementById('logs-pagination');
+  if (pages <= 1) { wrap.innerHTML = ''; return; }
+
+  let html = `<button class="page-btn" onclick="changePage(-1)" ${logsPage===0?'disabled':''}>‹</button>`;
+  for (let i = 0; i < pages; i++) {
+    if (pages > 7 && Math.abs(i - logsPage) > 2 && i !== 0 && i !== pages-1) {
+      if (i === 1 || i === pages-2) html += `<span style="padding:0 4px;color:#ccc">…</span>`;
+      continue;
+    }
+    html += `<button class="page-btn ${i===logsPage?'active':''}" onclick="goPage(${i})">${i+1}</button>`;
+  }
+  html += `<button class="page-btn" onclick="changePage(1)" ${logsPage>=pages-1?'disabled':''}>›</button>`;
+  wrap.innerHTML = html;
+}
+
+function changePage(dir) { goPage(logsPage + dir); }
+function goPage(p) {
+  logsPage = p;
+  renderLogs();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─────────────────────────────────────────────────────────────
+// SMTP
+// ─────────────────────────────────────────────────────────────
+async function loadSmtp() {
+  try {
+    const res = await fetch('/admin/smtp');
+    const configs = await res.json();
+    renderSmtp(configs);
+
+    const hasActive = configs.some(c => c.is_active);
+    const badge = document.getElementById('smtp-badge');
+    badge.style.display = hasActive ? 'none' : 'inline';
+  } catch (e) {
+    document.getElementById('smtp-list').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠</div><p>Failed to load SMTP configs.</p></div>`;
+  }
+}
+
+function renderSmtp(configs) {
+  const wrap = document.getElementById('smtp-list');
+  if (!configs.length) {
+    wrap.innerHTML = `<div class="card"><div class="empty-state"><div class="empty-icon">◎</div><p>No SMTP profiles configured. Add one to enable sending.</p></div></div>`;
+    return;
+  }
+
+  wrap.innerHTML = configs.map(c => `
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="card-header" style="margin-bottom:1rem;">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;letter-spacing:-0.01em">${esc(c.label)}</div>
+            <div style="font-size:0.8rem;color:#999;margin-top:0.15rem">${esc(c.host)}:${c.port}</div>
+          </div>
+          ${c.is_active
+            ? `<span class="badge badge-active" style="margin-left:0.25rem"><span class="dot dot-green"></span>Active</span>`
+            : `<span class="badge badge-inactive"><span class="dot dot-grey"></span>Inactive</span>`}
+        </div>
+        <div style="display:flex;gap:0.5rem;align-items:center;">
+          ${!c.is_active ? `<button class="btn btn-success btn-sm" onclick="activateSmtp(${c.id})">Set Active</button>` : ''}
+          <button class="btn btn-outline btn-sm" onclick="openSmtpModal(${c.id})">Edit</button>
+          ${!c.is_active ? `<button class="btn btn-danger btn-sm" onclick="confirmDeleteSmtp(${c.id}, '${esc(c.label)}')">Delete</button>` : ''}
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0.75rem;">
+        ${infoCell('Username',   c.username)}
+        ${infoCell('From Email', c.from_email || c.username)}
+        ${infoCell('TLS',        c.use_tls ? 'STARTTLS enabled' : 'Disabled')}
+        ${infoCell('Created',    fmtDate(c.created_at))}
+        ${infoCell('Updated',    fmtDate(c.updated_at))}
+      </div>
+    </div>
+  `).join('');
+}
+
+async function openSmtpModal(id) {
+  closeAllMenus();
+  const modal = document.getElementById('smtp-modal');
+
+  // Reset
+  ['smtp-label','smtp-host','smtp-username','smtp-password','smtp-from'].forEach(f => document.getElementById(f).value = '');
+  document.getElementById('smtp-port').value = '587';
+  document.getElementById('smtp-tls').checked = true;
+  document.getElementById('smtp-make-active').checked = false;
+  document.getElementById('smtp-edit-id').value = '';
+  document.getElementById('smtp-pass-note').style.display = 'none';
+  clearAlert('smtp-modal-alert');
+
+  if (id) {
+    document.getElementById('smtp-modal-title').textContent = 'Edit SMTP Profile';
+    document.getElementById('smtp-modal-sub').textContent   = 'Update the outgoing mail server settings.';
+    document.getElementById('smtp-pass-note').style.display = 'block';
+
+    try {
+      const res = await fetch(`/admin/smtp`);
+      const all = await res.json();
+      // find the real (unmasked) data — we only have masked from list
+      // so we just pre-fill what we have
+      const cfg = all.find(c => c.id === id);
+      if (cfg) {
+        document.getElementById('smtp-edit-id').value  = cfg.id;
+        document.getElementById('smtp-label').value    = cfg.label;
+        document.getElementById('smtp-host').value     = cfg.host;
+        document.getElementById('smtp-port').value     = cfg.port;
+        document.getElementById('smtp-username').value = cfg.username;
+        document.getElementById('smtp-from').value     = cfg.from_email;
+        document.getElementById('smtp-tls').checked    = cfg.use_tls;
+        document.getElementById('smtp-make-active').checked = cfg.is_active;
+      }
+    } catch (e) {}
+  } else {
+    document.getElementById('smtp-modal-title').textContent = 'Add SMTP Profile';
+    document.getElementById('smtp-modal-sub').textContent   = 'Configure an outgoing mail server.';
+  }
+
+  modal.classList.add('open');
+}
+
+async function saveSmtp() {
+  const editId = document.getElementById('smtp-edit-id').value;
+  const payload = {
+    label:       document.getElementById('smtp-label').value.trim(),
+    host:        document.getElementById('smtp-host').value.trim(),
+    port:        parseInt(document.getElementById('smtp-port').value),
+    username:    document.getElementById('smtp-username').value.trim(),
+    password:    document.getElementById('smtp-password').value,
+    from_email:  document.getElementById('smtp-from').value.trim(),
+    use_tls:     document.getElementById('smtp-tls').checked,
+    make_active: document.getElementById('smtp-make-active').checked,
+  };
+
+  if (!payload.host || !payload.username) {
+    showAlert('smtp-modal-alert', 'Host and username are required.', 'error');
+    return;
+  }
+  if (!editId && !payload.password) {
+    showAlert('smtp-modal-alert', 'Password is required for a new profile.', 'error');
+    return;
+  }
+
+  const btn     = document.getElementById('smtp-save-btn');
+  const spinner = document.getElementById('smtp-save-spinner');
+  btn.disabled  = true;
+  spinner.style.display = 'inline-block';
+
+  try {
+    const url    = editId ? `/admin/smtp/${editId}` : '/admin/smtp';
+    const method = editId ? 'PUT' : 'POST';
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) { showAlert('smtp-modal-alert', data.error || 'Save failed.', 'error'); return; }
+
+    closeModal('smtp-modal');
+    showToast(editId ? '✓ SMTP profile updated' : '✓ SMTP profile created');
+    loadSmtp();
+  } catch (e) {
+    showAlert('smtp-modal-alert', 'Network error: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+  }
+}
+
+async function activateSmtp(id) {
+  try {
+    const res = await fetch(`/admin/smtp/${id}/activate`, { method: 'POST' });
+    if (!res.ok) throw new Error((await res.json()).error);
+    showToast('✓ Profile activated');
+    loadSmtp();
+  } catch (e) {
+    showToast('Error: ' + e.message);
+  }
+}
+
+function confirmDeleteSmtp(id, label) {
+  openConfirm(
+    'Delete SMTP Profile',
+    label,
+    'This profile will be permanently deleted. This action cannot be undone.',
+    async () => {
+      const res = await fetch(`/admin/smtp/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error((await res.json()).error);
+      showToast('🗑 SMTP profile deleted');
+      loadSmtp();
+    }
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Confirm modal helper
+// ─────────────────────────────────────────────────────────────
+function openConfirm(title, sub, body, onConfirm) {
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-sub').textContent   = sub;
+  document.getElementById('confirm-body').textContent  = body;
+  const btn = document.getElementById('confirm-ok-btn');
+  btn.onclick = async () => {
+    try {
+      await onConfirm();
+      closeModal('confirm-modal');
+    } catch (e) {
+      showToast('Error: ' + e.message);
+      closeModal('confirm-modal');
+    }
+  };
+  document.getElementById('confirm-modal').classList.add('open');
+}
+
+// ─────────────────────────────────────────────────────────────
+// Utilities
+// ─────────────────────────────────────────────────────────────
+function closeModal(id)    { document.getElementById(id).classList.remove('open'); }
+function closeAllMenus()   { document.querySelectorAll('.action-menu.open').forEach(m => m.classList.remove('open')); }
+function toggleMenu(id)    { closeAllMenus(); document.getElementById(id).classList.toggle('open'); }
+
+function showAlert(id, msg, type = 'error') {
+  const el = document.getElementById(id);
+  const typeClass = type === 'success' ? 'alert-success' : type === 'info' ? 'alert-info' : 'alert-error';
+  el.className = `alert ${typeClass} show`;
+  el.innerHTML = `<span>${type === 'error' ? '⚠' : '✓'}</span><span>${esc(msg)}</span>`;
+}
+function clearAlert(id) {
+  const el = document.getElementById(id);
+  el.className = 'alert';
+  el.innerHTML = '';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function esc(str) {
+  return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  try {
+    return new Date(iso).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  } catch { return iso; }
+}
+function fmtDateFull(iso) {
+  if (!iso) return '—';
+  try {
+    return new Date(iso).toLocaleString('en-GB', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  } catch { return iso; }
+}
+function fmtTime(iso) {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso);
+    const today = new Date();
+    const isToday = d.toDateString() === today.toDateString();
+    if (isToday) return d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    return d.toLocaleDateString('en-GB', { day:'numeric', month:'short' }) + ' ' +
+           d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+  } catch { return iso; }
+}
+
+function infoCell(label, value) {
+  return `<div style="background:var(--warm);border-radius:8px;padding:0.7rem 0.85rem;">
+    <div style="font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#aaa;margin-bottom:0.2rem">${esc(label)}</div>
+    <div style="font-size:0.86rem;font-weight:500;color:var(--ink)">${esc(String(value ?? '—'))}</div>
+  </div>`;
+}
+
+function emptyRow(cols, msg) {
+  return `<tr><td colspan="${cols}"><div class="empty-state"><div class="empty-icon">○</div><p>${esc(msg)}</p></div></td></tr>`;
+}
+
+function togglePass(inputId, btn) {
+  const input = document.getElementById(inputId);
+  input.type = input.type === 'password' ? 'text' : 'password';
+  btn.textContent = input.type === 'password' ? '👁' : '🙈';
+}
+</script>
+</body>
+</html>

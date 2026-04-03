@@ -6,3 +6,5 @@ env_mailmerge/
 certificates/
 students.csv
 sed.sh
+app.db*
+client_secret.json
