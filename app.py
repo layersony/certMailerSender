@@ -496,4 +496,6 @@ def toggle_user_status(email):
     return jsonify({"success": True, "status": user.status})
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8080)
+    port = os.getenv('PORT')
+    debug = os.getenv('DEBUG')
+    app.run(debug=debug, port=port)
