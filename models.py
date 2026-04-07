@@ -309,7 +309,7 @@ def save_smtp_config(
     use_tls:    bool      = True,
     make_active: bool     = False,
     created_by: str | None = None,
-    config_id:  int | None = None,   # None → INSERT, int → UPDATE
+    config_id:  int | None = None,
     updated_by: str | None = None,
 ) -> int:
     """

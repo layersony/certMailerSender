@@ -280,7 +280,6 @@ def send_emails():
         finally:
             send_status[task_id]['complete'] = True
 
-            # ── Audit the whole batch once it finishes ───────────────────────
             ok      = send_status[task_id]['done'] - len(errors)
             failed  = len(errors)
             log_action(
@@ -293,7 +292,6 @@ def send_emails():
                 success=(failed == 0),
             )
 
-    # Audit the *initiation* immediately (so the user sees it even if tab closes)
     _audit("SEND_EMAILS_START", detail=f"task={task_id} recipients={len(students)}")
 
     threading.Thread(target=do_send, daemon=True).start()
@@ -342,7 +340,7 @@ def cleanup():
     _audit("CLEANUP", detail=f"deleted={deleted} errors={len(errors)}", success=(len(errors) == 0))
     return jsonify({'deleted': deleted, 'errors': errors})
 
-# ── Admin / audit API routes ──────────────────────────────────────────────────
+#  Admin / audit API routes
 
 @app.route('/admin/users')
 @admin_required
@@ -369,7 +367,7 @@ def admin_logs_summary():
     _audit("VIEW_ADMIN_LOGS_SUMMARY")
     return jsonify(log_summary())
 
-# ── Admin / SMTP config routes ────────────────────────────────────────────────
+# Admin / SMTP config routes 
 @app.route('/admin/smtp', methods=['GET'])
 @admin_required
 def admin_smtp_list():
